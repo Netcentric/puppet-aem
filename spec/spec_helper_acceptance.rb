@@ -93,6 +93,7 @@ end
 
 module_root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 aem_license(module_root)
+restart_test = FileTest.exist?(File.join(module_root, 'spec', 'files', 'cq-6.2.0-hotfix-12785-7.0.zip'))
 
 unless ENV['BEAKER_provision'] == 'no'
 
@@ -122,6 +123,11 @@ unless ENV['BEAKER_provision'] == 'no'
 
   test_zip = File.expand_path(File.join(module_root, 'spec', 'files', 'secondtest-1.0.0.zip'))
   scp_to(default, test_zip, '/tmp/secondtest-1.0.0.zip')
+
+  if restart_test
+    test_zip = File.expand_path(File.join(module_root, 'spec', 'files', 'cq-6.2.0-hotfix-12785-7.0.zip'))
+    scp_to(default, test_zip, '/tmp/cq-6.2.0-hotfix-12785-7.0.zip')
+  end
 
   # Credit to Puppetlabs Puppet Agent project,
   # This was the only place i could find that had an example that
@@ -399,5 +405,6 @@ end
 RSpec.configure do |c|
 
   c.filter_run_excluding(license: false) unless ENV['AEM_LICENSE']
+  c.filter_run_excluding(restart: false) unless restart_test
   c.formatter = :documentation
 end

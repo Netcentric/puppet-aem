@@ -10,6 +10,7 @@ define aem::crx::package (
   $pkg_name    = undef,
   $pkg_version = undef,
   $password    = undef,
+  $retries     = undef,
   $source      = undef,
   $type        = undef,
   $user        = 'aem',
@@ -67,6 +68,7 @@ define aem::crx::package (
         home     => $home,
         password => $password,
         pkg      => $pkg_name,
+        retries  => $retries,
         source   => $source,
         username => $username,
         version  => $pkg_version

@@ -854,7 +854,7 @@ describe 'crx package mgr api', license: false do
           username    => \"admin\"
         }
 
-        aem::crx::package { \"author-sescondtest-pkg\" :
+        aem::crx::package { \"author-secondtest-pkg\" :
           ensure      => present,
           home        => \"/opt/aem/author\",
           password    => \"admin\",
@@ -903,6 +903,72 @@ describe 'crx package mgr api', license: false do
       expect(list.total).to eq(1)
     end
     cmd = 'curl -s http://localhost:4502/crx/packmgr/list.jsp?path=/etc/packages/my_packages/secondtest-1.0.0.zip '
+    cmd += '-u admin:admin'
+    shell(cmd) do |result|
+      jsonresult = JSON.parse(result.stdout, symbolize_names: true)
+      list = CrxPackageManager::PackageList.new
+      list.build_from_hash(jsonresult)
+      expect(list.total).to eq(1)
+    end
+  end
+
+  it 'should support a package that requires a restart', restart: false do
+
+    # Make sure it's in the right state to start
+    cmd = 'curl -s http://localhost:4502/crx/packmgr/list.jsp?path=/etc/packages/my_packages/restarttest-1.0.0.zip '
+    cmd += '-u admin:admin'
+    shell(cmd) do |result|
+      jsonresult = JSON.parse(result.stdout, symbolize_names: true)
+      list = CrxPackageManager::PackageList.new
+      list.build_from_hash(jsonresult)
+
+      expect(list.total).to eq(0)
+    end
+
+    site = <<-MANIFEST
+      'node \"agent\" {
+        aem::crx::package { \"restart-test-pkg\" :
+          ensure      => installed,
+          home        => \"/opt/aem/author\",
+          password    => \"admin\",
+          pkg_group   => \"adobe/cq620/hotfix\",
+          pkg_name    => \"cq-6.2.0-hotfix-12785\",
+          pkg_version => \"7.0\",
+          source      => \"/tmp/cq-6.2.0-hotfix-12785-7.0.zip\",
+          type        => \"api\",
+          username    => \"admin\"
+        }
+
+      }'
+    MANIFEST
+
+    pp = <<-MANIFEST
+      file {
+        '#{master.puppet['codedir']}/environments/production/manifests/site.pp':
+          ensure => file,
+          content => #{site}
+      }
+    MANIFEST
+
+    apply_manifest_on(master, pp, catch_failures: true)
+    restart_puppetserver
+    fqdn = on(master, 'facter fqdn').stdout.strip
+    fqdn = fqdn.chop if fqdn.end_with?('.')
+
+    on(
+      default,
+      puppet("agent #{DEBUG} --detailed-exitcodes --onetime --no-daemonize --verbose --server #{fqdn}"),
+      acceptable_exit_codes: [0, 2]
+    )
+
+    # Ruby isn't idempotent on all platforms. So we can't check for zero exit status.
+    # on(
+    #   default,
+    #   puppet("agent --detailed-exitcodes --onetime --no-daemonize --verbose --server #{fqdn}"),
+    #   acceptable_exit_codes: [0]
+    # )
+
+    cmd = 'curl -s http://localhost:4502/crx/packmgr/list.jsp?path=/etc/packages/my_packages/restarttest-1.0.0.zip '
     cmd += '-u admin:admin'
     shell(cmd) do |result|
       jsonresult = JSON.parse(result.stdout, symbolize_names: true)
