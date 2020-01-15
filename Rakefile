@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'puppetlabs_spec_helper/rake_tasks'
 require 'puppet-lint/tasks/puppet-lint'
 require 'puppet-syntax/tasks/puppet-syntax'
@@ -5,9 +7,9 @@ require 'rake/clean'
 require 'rubocop/rake_task'
 
 exclude_paths = %w[
-  vendor/**/*.pp
-  spec/**/*.pp
-  pkg/**/*.pp
+  vendor/**/*
+  spec/**/*
+  pkg/**/*
 ]
 
 disabled_checks = %w[
@@ -19,7 +21,7 @@ disabled_checks = %w[
   variable_scope
 ]
 
-task default: %i[spec lint rubocop]
+task default: %i[spec lint rubocop clean]
 
 PuppetLint::RakeTask.new :lint do |config|
   config.fail_on_warnings = true
@@ -36,3 +38,4 @@ CLEAN.include('log')
 CLEAN.include('.vagrant')
 CLEAN.include('spec/fixtures')
 CLEAN.include('spec/acceptance/log')
+CLEAN.include('pkg')

@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 # Tests for the env script management based on parameters
-describe 'aem::service', type: :defines do
+describe 'aem::service' do
 
   let(:title) do
     'aem'
@@ -27,14 +29,14 @@ describe 'aem::service', type: :defines do
           tmp.delete(:home)
           tmp
         end
-        it { expect { is_expected.to compile }.to raise_error(/Home directory must be specified./) }
+        it { is_expected.to compile.and_raise_error(/Home directory must be specified./) }
       end
 
       context 'not absolute' do
         let(:params) do
           default_params.merge(home: 'not/absolute/path')
         end
-        it { expect { is_expected.to compile }.to raise_error(/is not an absolute path/) }
+        it { is_expected.to compile.and_raise_error(/is not an absolute path/) }
       end
     end
   end
@@ -57,7 +59,8 @@ describe 'aem::service', type: :defines do
             status: 'enabled',
             group: 'aem',
             home: '/opt/aem',
-            user: 'aem'
+            user: 'aem',
+            service_options: { 'TimeoutStopSec' => '4min', 'KillSignal' => 'SIGCONT', 'PrivateTmp' => true }
           )
         end
       end
@@ -123,7 +126,8 @@ describe 'aem::service', type: :defines do
           status: 'enabled',
           group: 'aem',
           home: '/opt/aem',
-          user: 'aem'
+          user: 'aem',
+          service_options: { 'TimeoutStopSec' => '4min', 'KillSignal' => 'SIGCONT', 'PrivateTmp' => true }
         )
       end
     end
@@ -169,7 +173,8 @@ describe 'aem::service', type: :defines do
           status: 'enabled',
           group: 'aem',
           home: '/opt/aem',
-          user: 'aem'
+          user: 'aem',
+          service_options: { 'TimeoutStopSec' => '4min', 'KillSignal' => 'SIGCONT', 'PrivateTmp' => true }
         )
       end
     end

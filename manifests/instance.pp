@@ -4,28 +4,29 @@
 #
 #
 define aem::instance (
-  $ensure         = 'present',
-  $context_root   = undef,
-  $debug_port     = undef,
-  $group          = 'aem',
-  $home           = undef,
-  $jvm_mem_opts   = '-Xmx1024m',
-  $jvm_opts       = undef,
-  $manage_group   = true,
-  $manage_home    = true,
-  $manage_user    = true,
-  $osgi_configs   = undef,
-  $crx_packages   = undef,
-  $port           = 4502,
-  $runmodes       = [],
-  $sample_content = true,
-  $snooze         = 10,
-  $source         = undef,
-  $status         = 'enabled',
-  $timeout        = 600,
-  $type           = author,
-  $user           = 'aem',
-  $version        = undef) {
+  $ensure           = 'present',
+  $context_root     = undef,
+  $debug_port       = undef,
+  $group            = 'aem',
+  $home             = undef,
+  $jvm_mem_opts     = '-Xmx1024m',
+  $jvm_opts         = undef,
+  $manage_group     = true,
+  $manage_home      = true,
+  $manage_user      = true,
+  $osgi_configs     = undef,
+  $crx_packages     = undef,
+  $port             = 4502,
+  $runmodes         = [],
+  $sample_content   = true,
+  $service_options  = undef,
+  $snooze           = 10,
+  $source           = undef,
+  $status           = 'enabled',
+  $timeout          = 600,
+  $type             = author,
+  $user             = 'aem',
+  $version          = undef) {
 
   anchor { "aem::${name}::begin": }
 
@@ -88,7 +89,11 @@ define aem::instance (
 
   validate_integer($timeout)
 
-  validate_re($type, '^(author|publish)$', "${type} is not supported for type. Allowed values are 'author' and 'publish'.")
+  validate_re(
+    $type,
+    '^(author|publish|standby)$',
+    "${type} is not supported for type. Allowed values are 'author', 'publish' and 'standby'."
+  )
 
   if $version {
     validate_re($version, '^\d+\.\d+(\.\d+)?$', "${version} is not a valid version.")
@@ -108,11 +113,12 @@ define aem::instance (
 
   if $status != 'unmanaged' {
     aem::service { $name :
-      ensure => $ensure,
-      status => $status,
-      home   => $_home,
-      user   => $user,
-      group  => $group,
+      ensure          => $ensure,
+      status          => $status,
+      home            => $_home,
+      user            => $user,
+      group           => $group,
+      service_options => $service_options
     }
   }
 
