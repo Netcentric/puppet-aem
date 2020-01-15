@@ -139,7 +139,9 @@ define aem::dispatcher::farm(
 
   if $invalidate_handler {
     validate_absolute_path($invalidate_handler)
-  } elsif $invalidate == undef {
+  }
+
+  if $invalidate == undef {
     $_invalidate = $::aem::dispatcher::params::invalidate
   } else {
 
