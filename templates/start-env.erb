@@ -28,13 +28,16 @@ SLING_PROPS='conf/sling.properties'
 # Do we ever implement these?
 #HOST=
 #FILE_SIZE_LIMIT
+#USE_JAAS=
+#USE_CLDR='true'
+
 
 # This doesn't ever seem to work
 #LOG_LEVEL=
 
 
-# add the possibility to load additional env context 
-# from the bin folder that only will be valid for the aem-process 
+# add the possibility to load additional env context
+# from the bin folder that only will be valid for the aem-process
 for i in $BIN_PATH/*_env.sh  ; do
     if [ -r "$i" ]; then
         if [ "${-#*i}" != "$-" ]; then
